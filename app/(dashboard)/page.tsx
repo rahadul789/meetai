@@ -6,8 +6,15 @@ import { redirect } from "next/navigation";
 import { Button } from "@/components/ui/button";
 
 const page = async () => {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+  if (!session) {
+    redirect("/auth/sign-in");
+  }
   return (
     <div>
+      {session.user.name}
       <HomeView />
     </div>
   );
