@@ -38,7 +38,9 @@ export const AgentForm = ({
   const createAgent = useMutation(
     trpc.agents.create.mutationOptions({
       onSuccess: async () => {
-        await queryClient.invalidateQueries(trpc.agents.getMany.queryOptions()); // ekhane amra invalidate kore disi , er mane hocche jkhn user kono new agent create korbe tkhn sheta imidiatly page reload NA hoye agent list a shob gula dekhabe. JETA AMI NEXT JS A revalidatepath USE KOREY KORTE PARI.
+        await queryClient.invalidateQueries(
+          trpc.agents.getMany.queryOptions({})
+        ); // ekhane amra invalidate kore disi , er mane hocche jkhn user kono new agent create korbe tkhn sheta imidiatly page reload NA hoye agent list a shob gula dekhabe. JETA AMI NEXT JS A revalidatepath USE KOREY KORTE PARI.
         if (initialValues?.id) {
           queryClient.invalidateQueries(
             trpc.agents.getOne.queryOptions({ id: initialValues.id })
