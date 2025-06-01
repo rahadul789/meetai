@@ -41,6 +41,31 @@ export const AgentForm = ({
         await queryClient.invalidateQueries(
           trpc.agents.getMany.queryOptions({})
         ); // ekhane amra invalidate kore disi , er mane hocche jkhn user kono new agent create korbe tkhn sheta imidiatly page reload NA hoye agent list a shob gula dekhabe. JETA AMI NEXT JS A revalidatepath USE KOREY KORTE PARI.
+
+        // nicher code ta comment kore disi coz this point, its never exists in cache
+        // if (initialValues?.id) {
+        //   queryClient.invalidateQueries(
+        //     trpc.agents.getOne.queryOptions({ id: initialValues.id })
+        //   );
+        // }
+
+        // TODO: Invalidate free tier uses
+        onSuccess?.(); // This will then close it coz new-agent-dialog.tsx a model close option eta k close kore dibe
+      },
+      onError: (error) => {
+        toast.error(error.message);
+
+        // TODO: Check if error code is "FORBIDDEN", redirect to "/upgrade"
+      },
+    })
+  );
+
+  const updateAgent = useMutation(
+    trpc.agents.update.mutationOptions({
+      onSuccess: async () => {
+        await queryClient.invalidateQueries(
+          trpc.agents.getMany.queryOptions({})
+        ); // ekhane amra invalidate kore disi , er mane hocche jkhn user kono new agent create korbe tkhn sheta imidiatly page reload NA hoye agent list a shob gula dekhabe. JETA AMI NEXT JS A revalidatepath USE KOREY KORTE PARI.
         if (initialValues?.id) {
           queryClient.invalidateQueries(
             trpc.agents.getOne.queryOptions({ id: initialValues.id })
@@ -65,11 +90,11 @@ export const AgentForm = ({
   });
 
   const isEdit = !!initialValues?.id;
-  const isPending = createAgent.isPending;
+  const isPending = createAgent.isPending || updateAgent.isPending;
 
   const onSubmit = (values: z.infer<typeof agentsInsertSchema>) => {
     if (isEdit) {
-      console.log("TODO: updateAgent");
+      updateAgent.mutate({ ...values, id: initialValues.id });
     } else {
       createAgent.mutate(values);
     }
