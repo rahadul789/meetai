@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { db } from "@/lib/db";
-import { meetings } from "@/lib/db/schema";
+import { agents, meetings } from "@/lib/db/schema";
 
 import {
   createTRPCRouter,
@@ -8,7 +8,7 @@ import {
   protectedProcedure,
 } from "@/trpc/init";
 import { TRPCError } from "@trpc/server";
-import { and, count, desc, eq, getTableColumns, ilike } from "drizzle-orm";
+import { and, count, desc, eq, getTableColumns, ilike, sql } from "drizzle-orm";
 import {
   DEFAULT_PAGE,
   DEFAULT_PAGE_SIZE,
@@ -53,17 +53,20 @@ export const meetingsRouter = createTRPCRouter({
           .default(DEFAULT_PAGE_SIZE),
         search: z.string().nullish(),
       })
-      // .optional() // eta ekhane optional na korle ami error pabo "agents-view" page er this line a: const { data } = useSuspenseQuery(trpc.agents.getMany.queryOptions());
     )
 
     .query(async ({ ctx, input }) => {
       const { search, page, pageSize } = input;
       const data = await db
-
         .select({
           ...getTableColumns(meetings),
+          agent: agents,
+          duration: sql<number>`EXTRACT(EPOCH FROM (ended_at - started_at))`.as(
+            "duration"
+          ),
         })
         .from(meetings)
+        .innerJoin(agents, eq(meetings.agentId, agents.id)) // left join use korle agents er value null hoye jeto , tay inner join use korechi
         .where(
           and(
             eq(meetings.userId, ctx.auth.user.id),
@@ -77,6 +80,7 @@ export const meetingsRouter = createTRPCRouter({
       const [total] = await db
         .select({ count: count() })
         .from(meetings)
+        .innerJoin(agents, eq(meetings.agentId, agents.id))
         .where(
           and(
             eq(meetings.userId, ctx.auth.user.id),
@@ -91,9 +95,6 @@ export const meetingsRouter = createTRPCRouter({
         total: total.count,
         totalPages,
       };
-
-      // await new Promise((resolve) => setTimeout(resolve, 5000));
-      // throw new TRPCError({ code: "BAD_REQUEST" }); // ekhane error ashle eta unhandled rernder hote thake , eta @tanstack/react-query uhandled rerender likhe research korley solution pawa jabe, suggested solution holo lower version use kora and another package install kora type
     }),
 
   create: protectedProcedure
