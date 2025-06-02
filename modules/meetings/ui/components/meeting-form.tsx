@@ -52,7 +52,7 @@ export const MeetingForm = ({
     trpc.meetings.create.mutationOptions({
       onSuccess: async (data) => {
         await queryClient.invalidateQueries(
-          trpc.agents.getMany.queryOptions({})
+          trpc.meetings.getMany.queryOptions({})
         );
         // TODO: Invalidate free tier uses
         onSuccess?.(data.id);
