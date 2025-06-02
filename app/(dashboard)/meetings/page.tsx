@@ -12,16 +12,30 @@ import { redirect } from "next/navigation";
 import React, { Suspense } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 
-const page = async () => {
+import { loadSearchParams } from "@/modules/meetings/params";
+import type { SearchParams } from "nuqs/server";
+
+interface Props {
+  searchParams: Promise<SearchParams>;
+}
+
+const page = async ({ searchParams }: Props) => {
+  const filters = await loadSearchParams(searchParams);
+
   const session = await auth.api.getSession({
     headers: await headers(),
   });
+
   if (!session) {
     redirect("/auth/sign-in");
   }
 
   const queryClient = getQueryClient();
-  void queryClient.prefetchQuery(trpc.meetings.getMany.queryOptions({}));
+  void queryClient.prefetchQuery(
+    trpc.meetings.getMany.queryOptions({
+      ...filters,
+    })
+  );
   const dehydratedState = dehydrate(queryClient);
   return (
     <div>
