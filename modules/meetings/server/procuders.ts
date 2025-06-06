@@ -40,6 +40,9 @@ export const meetingsRouter = createTRPCRouter({
     const expirationTime = Math.floor(Date.now() / 1000) + 3600; // 1hr
     const issuedAt = Math.floor(Date.now() / 1000) - 60;
 
+    // ekhane  expirationTime, issuedAt na use korlew kono problem nei. and generateUserToken a pss korar ew dorkar nei.
+    // if its expire soon u can remove this two params
+
     const token = streamVideo.generateUserToken({
       user_id: ctx.auth.user.id, // ekhane only id diye token banalew, this token also can know name and ,role , coz we upsert the user first
       exp: expirationTime,
