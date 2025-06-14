@@ -32,7 +32,7 @@ const page = async ({ params }: Props) => {
     trpc.meetings.getOne.queryOptions({ id: meetingId })
   );
 
-  // TODO: Prefetch `meetings.getTranscript`
+  // TODO: Prefetch `meetings.getTranscript` // we no need to do that because in actual transcript  we decided to use useQuery
   const dehydratedState = dehydrate(queryClient);
 
   return (
