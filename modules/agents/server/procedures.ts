@@ -6,6 +6,7 @@ import {
   createTRPCRouter,
   baseProcedure,
   protectedProcedure,
+  premiumProcedure,
 } from "@/trpc/init";
 import { TRPCError } from "@trpc/server";
 import { agentsInsertSchema, agentUpdateSchema } from "../schemas";
@@ -137,7 +138,7 @@ export const agentsRouter = createTRPCRouter({
       // throw new TRPCError({ code: "BAD_REQUEST" }); // ekhane error ashle eta unhandled rernder hote thake , eta @tanstack/react-query uhandled rerender likhe research korley solution pawa jabe, suggested solution holo lower version use kora and another package install kora type
     }),
 
-  create: protectedProcedure
+  create: premiumProcedure("agents")
     .input(agentsInsertSchema)
     .mutation(async ({ input, ctx }) => {
       const [createdAgent] = await db

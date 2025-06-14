@@ -50,12 +50,18 @@ export const AgentForm = ({
         // }
 
         // TODO: Invalidate free tier uses
+        await queryClient.invalidateQueries(
+          trpc.premium.getFreeUsage.queryOptions()
+        );
         onSuccess?.(); // This will then close it coz new-agent-dialog.tsx a model close option eta k close kore dibe
       },
       onError: (error) => {
         toast.error(error.message);
 
         // TODO: Check if error code is "FORBIDDEN", redirect to "/upgrade"
+        if (error.data?.code === "FORBIDDEN") {
+          router.push("/upgrade");
+        }
       },
     })
   );
@@ -75,8 +81,6 @@ export const AgentForm = ({
       },
       onError: (error) => {
         toast.error(error.message);
-
-        // TODO: Check if error code is "FORBIDDEN", redirect to "/upgrade"
       },
     })
   );
